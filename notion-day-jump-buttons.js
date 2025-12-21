@@ -120,7 +120,7 @@
 		});
 	}
 
-	// check day currently in view
+	// check day group currently visible
 	// function refreshStyle() {
 	//   if (!buttonsContainer) return;
 	//   if (isSidePeekOpen()) {
@@ -131,6 +131,11 @@
 	//     buttonsContainer.style.color = "#333";
 	//   }
 	// }
+
+	function updateButtonStyle(btn, isVisible) {
+		btn.style.background = isVisible ? "rgb(35,131,226)" : "rgb(244,245,247)";
+		btn.style.color = isVisible ? "#fff" : "#333";
+	}
 
 	function updateActiveGroup() {
 		if (!buttonsContainer) return;
@@ -147,14 +152,7 @@
 			else break;
 		}
 
-		[...buttonsContainer.children].forEach(btn => {
-			btn.style.background =
-				btn.textContent === active.label
-					? "rgb(35,131,226)"
-					: "rgb(244,245,247)";
-			btn.style.color =
-				btn.textContent === active.label ? "#fff" : "#333";
-		});
+		[...buttonsContainer.children].forEach(btn => updateButtonStyle(btn, btn.textContent === active.label));
 	}
 
 	function reposition() {
