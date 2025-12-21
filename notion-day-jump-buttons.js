@@ -8,6 +8,18 @@
 	// CSS styling
 	const style = document.createElement('style');
 	style.textContent = `
+
+		.tm-notion-day-jump-btns-container {
+			position: absolute;
+			top: 60px;
+			left: 12px;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 6px;
+			z-index: 9999;
+		}
+
 		.tm-notion-day-jump-btn {
 			padding: 6px 10px;
 			border-radius: 6px;
@@ -93,16 +105,7 @@
 
 		buttonsContainer = document.createElement("div");
 		buttonsContainer.id = BTNS_CONTAINER_ID;
-
-		Object.assign(buttonsContainer.style, {
-			position: "absolute",
-			top: "60px",
-			left: "12px",
-			display: "flex",
-			flexDirection: "row",
-			gap: "6px",
-			zIndex: 9999
-		});
+		buttonsContainer.classList.add('tm-notion-day-jump-btns-container');
 
 		// root.appendChild(buttonsContainer);
 		return buttonsContainer;
