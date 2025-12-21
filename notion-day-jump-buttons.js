@@ -250,6 +250,47 @@
 		scroller.addEventListener("scroll", updateActiveButton, { passive: true });
 	}
 
+	function waitForListStabilized(cb, delay = 150) {
+		let last = 0;
+		let stableTimer = null;
+
+		const obs = new MutationObserver(() => {
+			const groups = findGroupElements();
+			if (!groups.length) return;
+
+			const totalHeight = groups.reduce(
+				(s, g) => s + g.element.getBoundingClientRect().height,
+				0
+			);
+
+			if (Math.abs(totalHeight - last) < 2) {
+				if (!stableTimer) {
+					stableTimer = setTimeout(() => {
+						obs.disconnect();
+						cb();
+					}, delay);
+				}
+			} else {
+				clearTimeout(stableTimer);
+				stableTimer = null;
+				last = totalHeight;
+			}
+		});
+
+		obs.observe(
+			document.querySelector(LIST_VIEW_ROOT_SELECTOR),
+			{ childList: true, subtree: true }
+		);
+	}
+
+	function nudgeScroller() {
+		const scroller = getScroller();
+		if (!scroller) return;
+		scroller.scrollTop += 1;
+		scroller.scrollTop -= 1;
+	}
+
+
 	function attach(rootEl) {
 		root = rootEl;
 		if (getComputedStyle(root).position === "static") {
@@ -261,9 +302,10 @@
 
 		// refreshStyle();
 		updateContainerPosition(); // first call
-		updateButtons(); // first call
-		// updateActiveButton(); // first call
 		observeListView(); // will trigger updateButtons() if listview changes
+
+		waitForListStabilized(() => { updateActiveButton(); }); // wait for list to load and update
+
 		observeScroll(); // will trigger updateActiveButton() if scroll
 	}
 
