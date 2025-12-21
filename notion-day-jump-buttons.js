@@ -17,52 +17,9 @@
 	let buttonsContainer = null;
 	let root = null;
 
-	// function findGroupElements() {
-	// 	const groups = [...document.querySelectorAll(GROUP_SELECTOR)]
-	// 		.filter(el => el.children.length > 0) // skip empty ones
-	// 		.slice(3); // skip first elements which are not groups (/!\)
-	// 	return groups;
-	// }
-
-	// function groupName(groupElement) {
-	// 	// get second child (a div)
-	// 	const text = groupElement.children[1].innerText.trim();
-	// 	return text;
-	// }
-
-	// function findGroupElements() {
-	// 	const blocks = document.querySelectorAll(GROUP_SELECTOR);
-	// 	const groups = [];
-
-	// 	blocks.forEach(block => {
-	// 		// find the first text-only element (group header)
-	// 		const header = [...block.querySelectorAll("div")]
-	// 			.find(el =>
-	// 				el.children.length === 0 &&
-	// 				el.innerText &&
-	// 				el.innerText.trim().length > 0
-	// 			);
-
-	// 		if (!header) return;
-
-	// 		// group container = closest meaningful wrapper
-	// 		const groupElement = header.closest(".notion-collection_view-block");
-	// 		if (!groupElement) return;
-
-	// 		groups.push({
-	// 			label: header.innerText.trim(),
-	// 			el: groupElement
-	// 		});
-	// 	});
-
-	// 	// deduplicate (Notion sometimes nests)
-	// 	return [...new Map(groups.map(g => [g.label, g])).values()];
-	// }
 
 	function findGroupElements() {
 		const candidates = document.querySelectorAll(GROUP_SELECTOR);
-		// 	".notion-selectable.notion-collection_view-block"
-		// );
 
 		const groups = [];
 
@@ -91,6 +48,10 @@
 				label: labelDiv.innerText.trim()
 			});
 		});
+
+		// 	// deduplicate (Notion sometimes nests)
+		// 	return [...new Map(groups.map(g => [g.label, g])).values()];
+		// }
 
 		return groups;
 	}
@@ -125,21 +86,6 @@
 	function refreshButtons() {
 
 		console.log('refreshButtons');
-
-		// const root = document.querySelector(ROOT_SELECTOR);
-		// if (!root) {
-		// 	console.log('refreshButtons - root not found');
-		// 	return;
-		// }
-		// else console.log('refreshButtons - root found');
-
-
-		// if (getComputedStyle(root).position === "static") {
-		// 	root.style.position = "relative";
-		// }
-
-		// const buttonsContainer = createButtonsContainer(root);
-		// if (!buttonsContainer) return;
 
 		// reset to empty
 		buttonsContainer.innerHTML = "";
@@ -239,37 +185,9 @@
 	
 	attachObserver.observe(document.body, { childList: true, subtree: true });
 
-
-	// watch list view (must not include buttons container otherwise infinite loop)
-	// const reactiveObserver = new MutationObserver(() => {
-	//   // refreshStyle();
-	//   reposition();
-	// 	refreshButtons();
-	// });
-
-	// reactiveObserver.observe(document.body, { childList: true, subtree: true });
-
 	window.addEventListener("resize", reposition);
 	window.addEventListener("scroll", reposition, true);
 	// window.addEventListener("popstate", refreshStyle);
 	// window.addEventListener("visibilitychange", refreshStyle);
-
-
-
-
-
-
-
-	// Observe list rebuilds (grouping, filters, navigation)
-	// const mo = new MutationObserver(refreshButtons);
-	// mo.observe(document.body, { childList: true, subtree: true });
-
-	//   // reactive updates (read-only)
-	// const reactiveObserver = new MutationObserver(() => {
-	//   // refreshStyle();
-	//   reposition();
-	// 	refreshButtons();
-	// });
-	// reactiveObserver.observe(document.body, { childList: true, subtree: true });
 
 })();
