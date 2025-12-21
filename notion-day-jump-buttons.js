@@ -94,9 +94,31 @@
 	}
 
 
+	
+	function getScroller() {
+		return document.querySelector(".notion-frame > .notion-selectable-container > .notion-scroller.vertical");
+	}
+	
+	const SCROLL_OFFSET = 25;
 
 	function scrollToGroup(el) {
-		el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+		const scroller = getScroller();
+		if (!scroller) return;
+
+		const scrollerRect = scroller.getBoundingClientRect();
+		const elRect = el.getBoundingClientRect();
+
+		const y =
+			scroller.scrollTop +
+			(elRect.top - scrollerRect.top) - SCROLL_OFFSET;
+
+		scroller.scrollTo({
+			top: y,
+			behavior: "smooth"
+		});
+
+		scroller.focus?.();
 	}
 
 	function makeButtonsContainer() {
