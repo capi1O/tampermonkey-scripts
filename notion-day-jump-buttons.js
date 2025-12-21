@@ -59,16 +59,16 @@
 
 		const groups = [];
 
-		candidates.forEach(el => {
+		candidates.forEach(element => {
 			// Exclude list items
-			if (el.classList.contains("notion-collection-item")) return;
+			if (element.classList.contains("notion-collection-item")) return;
 
 			// Must have a caret button
-			const caret = el.querySelector(':scope > div[role="button"]');
+			const caret = element.querySelector(':scope > div[role="button"]');
 			if (!caret) return;
 
 			// Must have a text label (second div, text-only)
-			const labelDiv = [...el.children].find(c =>
+			const labelDiv = [...element.children].find(c =>
 				c.tagName === "DIV" &&
 				c.children.length === 0 &&
 				c.innerText?.trim()
@@ -76,19 +76,19 @@
 			if (!labelDiv) return;
 
 			// Must have popup-origin block (count / controls)
-			const popup = el.querySelector('[data-popup-origin="true"] div');
+			const popup = element.querySelector('[data-popup-origin="true"] div');
 			if (!popup) return;
 
 			groups.push({
-				el,
+				element,
 				label: labelDiv.innerText.trim()
 			});
 		});
 
 		groups.sort(
 			(a, b) =>
-				a.el.getBoundingClientRect().top -
-				b.el.getBoundingClientRect().top
+				a.element.getBoundingClientRect().top -
+				b.element.getBoundingClientRect().top
 		);
 
 		return groups;
@@ -102,13 +102,13 @@
 	
 	const SCROLL_OFFSET = 25;
 
-	function scrollToGroup(el) {
+	function scrollToGroup(element) {
 
 		const scroller = getScroller();
 		if (!scroller) return;
 
 		const scrollerRect = scroller.getBoundingClientRect();
-		const elRect = el.getBoundingClientRect();
+		const elRect = element.getBoundingClientRect();
 
 		const y =
 			scroller.scrollTop +
@@ -151,14 +151,14 @@
 		}
 		// else console.log(`updateButtons - found ${groupElements.length} groups`); 
 
-		groupElements.forEach(({ label, el }) => {
+		groupElements.forEach(({ label, element }) => {
 			
 			// create button if it does not already exists
 			if (!existingLabels.includes(label)) {
 				const btn = document.createElement("button");
 				btn.textContent = label;
 				btn.classList.add('tm-notion-day-jump-btn');
-				btn.onclick = () => scrollToGroup(el);
+				btn.onclick = (event) => scrollToGroup(element);
 				buttonsContainer.appendChild(btn);
 			}
 		});
@@ -172,7 +172,7 @@
 		let activeGroup;
 
 		for (const g of groups) {
-			const top = g.el.getBoundingClientRect().top;
+			const top = g.element.getBoundingClientRect().top;
 			if (top - VISIBILITY_OFFSET <= 0) activeGroup = g;
 			else break;
 		}
@@ -284,12 +284,12 @@
 		);
 	}
 
-	function nudgeScroller() {
-		const scroller = getScroller();
-		if (!scroller) return;
-		scroller.scrollTop += 1;
-		scroller.scrollTop -= 1;
-	}
+	// function nudgeScroller() {
+	// 	const scroller = getScroller();
+	// 	if (!scroller) return;
+	// 	scroller.scrollTop += 1;
+	// 	scroller.scrollTop -= 1;
+	// }
 
 
 	function attach(rootEl) {
@@ -308,6 +308,9 @@
 		waitForListStabilized(() => { updateActiveButton(); }); // wait for list to load and update
 
 		observeScroll(); // will trigger updateActiveButton() if scroll
+
+		// nudgeScroller();
+
 	}
 
 	// wait once for stable root
