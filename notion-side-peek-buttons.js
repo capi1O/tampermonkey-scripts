@@ -8,6 +8,7 @@
   const PAGE_P_PARAM = "27a9f56ff57941f883ea5147c7f99bb5";
   const BTN_ID = "tm-notion-sidepeek-backlog-btn";
 
+  // buttons are added to root element (.notion-frame) and manuallyy positionned relatively to target because it is not possible to add them directly to target (blocked by Notion)
   const STABLE_ROOT_SELECTOR = ".notion-frame";
   const TARGET_SELECTOR =
     ".notion-frame > .notion-selectable-container > .notion-scroller.vertical > div > .layout > .layout-content";
