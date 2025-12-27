@@ -10,15 +10,14 @@
 	style.textContent = `
 
 		.tm-notion-day-jump-btns-container {
-			position: absolute;
-			top: 60px;
-			left: 12px;
+			margin-left: 0px;
 			display: flex;
-			flex-direction: column;
-			align-items: stretch;
+			flex-direction: row;
+			align-items: flex-start;
 			gap: 6px;
 			z-index: 9999;
 			width: max-content;
+			white-space: nowrap;
 		}
 
 		.tm-notion-day-jump-btn {
@@ -45,10 +44,8 @@
 	const LIST_VIEW_ROOT_SELECTOR =
 	".notion-page-content > .notion-selectable.notion-transclusion_reference-block";
 
-	// buttons are added to root element (.notion-frame) and manually positionned relatively to target because it is not possible to add them directly to target (blocked by Notion)
-	const STABLE_ROOT_SELECTOR = ".notion-frame";
-	const TARGET_SELECTOR =
-		".notion-frame > .notion-selectable-container > .notion-scroller.vertical > div > .layout > .layout-content";
+	const NOTION_TOPBAR_SELECTOR = ".notion-topbar";
+	const NOTION_TOPBAR_BREADCRUMB_SELECTOR = ".notion-topbar .shadow-cursor-breadcrumb";
 
 	let buttonsContainer = null;
 	let root = null;
@@ -247,16 +244,16 @@
 		);
 	}
 
-	function updateContainerPosition() {
-		if (!root || !buttonsContainer) return;
+	// function updateContainerPosition() {
+	// 	if (!root || !buttonsContainer) return;
 
-		const target = document.querySelector(TARGET_SELECTOR);
-		if (!target) return;
+	// 	const target = document.querySelector(TARGET_SELECTOR);
+	// 	if (!target) return;
 
-		const r = target.getBoundingClientRect();
-		const rr = root.getBoundingClientRect();
-		buttonsContainer.style.right = `${rr.left - r.left + 8}px`;
-	}
+	// 	const r = target.getBoundingClientRect();
+	// 	const rr = root.getBoundingClientRect();
+	// 	buttonsContainer.style.right = `${rr.left - r.left + 8}px`;
+	// }
 
 	let listObserver = null;
 
@@ -324,17 +321,18 @@
 	// }
 
 
-	function attach(rootEl) {
-		root = rootEl;
-		if (getComputedStyle(root).position === "static") {
-			root.style.position = "relative";
+	function attach(topbar, breadcrumb) {
+		if (getComputedStyle(topbar).position === "static") {
+			topbar.style.position = "relative";
 		}
 
 		const b = buildButtonsContainer();
-		if (!root.contains(b)) root.appendChild(b);
+		if (!topbar.contains(b)) {
+			breadcrumb.after(b);
+		}
 
 		// refreshStyle();
-		updateContainerPosition(); // first call
+		// updateContainerPosition(); // first call
 		observeListView(); // will trigger updateButtons() if listview changes
 
 		waitForListStabilized(() => { updateActiveButton(); }); // wait for list to load and update
@@ -347,17 +345,26 @@
 
 	// wait once for stable root
 	const attachObserver = new MutationObserver(() => {
-		const r = document.querySelector(STABLE_ROOT_SELECTOR);
-		if (r) {
-			attachObserver.disconnect();
-			attach(r);
+		const topbar = document.querySelector(NOTION_TOPBAR_SELECTOR);
+		if (topbar) {
+				const breadcrumb = topbar.querySelector(NOTION_TOPBAR_BREADCRUMB_SELECTOR);
+				if (breadcrumb) {
+					attachObserver.disconnect();
+					// console.log('topbar and breadcrumb found, attaching');
+					attach(topbar, breadcrumb);
+				}
+				// else console.log('breadcrumb not found');
+
 		}
+		// else  console.log('topbar not found');
 	});
 	
 	attachObserver.observe(document.body, { childList: true, subtree: true });
 
-	window.addEventListener("resize", updateContainerPosition);
-	window.addEventListener("scroll", updateContainerPosition, true);
+	
+
+	// window.addEventListener("resize", updateContainerPosition);
+	// window.addEventListener("scroll", updateContainerPosition, true);
 	
 	// window.addEventListener("scroll", updateActiveButton, true);
 
