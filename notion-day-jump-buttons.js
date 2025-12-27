@@ -35,6 +35,10 @@
 			background: rgb(35,131,226);
 			color: #fff;
 		}
+
+		.tm-notion-hide, .notion-topbar-share-menu, .notion-topbar-favorite-button {
+			display: none !important;
+		}
 	`;
 	document.head.appendChild(style);
 
@@ -244,17 +248,6 @@
 		);
 	}
 
-	// function updateContainerPosition() {
-	// 	if (!root || !buttonsContainer) return;
-
-	// 	const target = document.querySelector(TARGET_SELECTOR);
-	// 	if (!target) return;
-
-	// 	const r = target.getBoundingClientRect();
-	// 	const rr = root.getBoundingClientRect();
-	// 	buttonsContainer.style.right = `${rr.left - r.left + 8}px`;
-	// }
-
 	let listObserver = null;
 
 	function observeListView() {
@@ -331,8 +324,6 @@
 			breadcrumb.after(b);
 		}
 
-		// refreshStyle();
-		// updateContainerPosition(); // first call
 		observeListView(); // will trigger updateButtons() if listview changes
 
 		waitForListStabilized(() => { updateActiveButton(); }); // wait for list to load and update
@@ -352,6 +343,8 @@
 					attachObserver.disconnect();
 					// console.log('topbar and breadcrumb found, attaching');
 					attach(topbar, breadcrumb);
+
+					hidePageLocationButton();
 				}
 				// else console.log('breadcrumb not found');
 
@@ -362,13 +355,30 @@
 	attachObserver.observe(document.body, { childList: true, subtree: true });
 
 	
+	// hide page location ("Private") button (cannot in CSS only)
+	function hidePageLocationButton() {
+		// console.log('hideTopBarButtons');
 
-	// window.addEventListener("resize", updateContainerPosition);
-	// window.addEventListener("scroll", updateContainerPosition, true);
-	
-	// window.addEventListener("scroll", updateActiveButton, true);
+		document.querySelectorAll(".shadow-cursor-breadcrumb div[role='button']")
+			.forEach(btn => {
+				if (btn.innerText?.trim() === "Priv	ate") {
+					btn.classList.add("tm-notion-hide");
+				}
+			});
+	}
 
-	// window.addEventListener("popstate", refreshStyle);
-	// window.addEventListener("visibilitychange", refreshStyle);
+	// const breadcrumbObserver = new MutationObserver(() => {
+	// 	const breadcrumb = document.querySelector(NOTION_TOPBAR_BREADCRUMB_SELECTOR);
+	// 	if (breadcrumb) {
+	// 		console.log('breadcrumb found');
+	// 		hideTopBarButtons(breadcrumb);
+	// 	}
+	// 	else console.log('breadcrumb not found');
+	// });
+
+	// breadcrumbObserver.observe(breadcrumb, {
+	// 	childList: true,
+	// 	subtree: true
+	// });
 
 })();
