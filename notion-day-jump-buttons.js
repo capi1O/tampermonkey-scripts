@@ -13,9 +13,9 @@
 			margin-left: 0px;
 			display: flex;
 			flex-direction: row;
-			align-items: flex-start;
+			align-items: center;
+			justify-content: flex-end;
 			gap: 6px;
-			z-index: 9999;
 			width: max-content;
 			white-space: nowrap;
 		}
@@ -50,10 +50,6 @@
 
 	const NOTION_TOPBAR_SELECTOR = ".notion-topbar";
 	const NOTION_BREADCRUMB_SELECTOR = ".shadow-cursor-breadcrumb";
-
-	let buttonsContainer = null;
-	let root = null;
-
 
 	function findGroups() {
 		const candidates = document.querySelectorAll(GROUP_HEADER_SELECTOR);
@@ -141,6 +137,7 @@
 		scroller.focus?.();
 	}
 
+	let buttonsContainer = null;
 	function buildButtonsContainer() {
 		// let buttonsContainer = document.getElementById(BTNS_CONTAINER_ID);
 		if (buttonsContainer) return buttonsContainer;

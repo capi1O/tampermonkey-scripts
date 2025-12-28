@@ -8,6 +8,18 @@
 	const style = document.createElement('style');
 	style.textContent = `
 
+		.tm-notion-side-peek-btns-container {
+				margin-left: 0px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-end;
+				gap: 6px;
+				width: max-content;
+				white-space: nowrap;
+				flex-grow: 1;
+		}
+
 		.tm-notion-side-peek-btn {
 			padding: 6px 10px;
 			border-radius: 6px;
@@ -34,10 +46,12 @@
 
 	const BLOCK_ID = "27a9f56f-f579-41f8-83ea-5147c7f99bb5";
 	const PAGE_P_PARAM = "27a9f56ff57941f883ea5147c7f99bb5";
+
+	const BTNS_CONTAINER_ID = "tm-notion-side-peek-btns-container";
 	const BTN_ID = "tm-notion-sidepeek-backlog-btn";
 
 	const NOTION_TOPBAR_SELECTOR = ".notion-topbar";
-	const NOTION_TOPBAR_BREADCRUMB_SELECTOR = ".notion-topbar .shadow-cursor-breadcrumb";
+	const NOTION_BREADCRUMB_SELECTOR = ".shadow-cursor-breadcrumb";
 
 	function isSidePeekOpen() {
 		return location.search.includes(`p=${PAGE_P_PARAM}`);
@@ -48,9 +62,20 @@
 		a?.dispatchEvent(new MouseEvent("click", { altKey: true, bubbles: true }));
 	}
 
+	let buttonsContainer = null;
+	function buildButtonsContainer() {
+		// let buttonsContainer = document.getElementById(BTNS_CONTAINER_ID);
+		if (buttonsContainer) return buttonsContainer;
+		
+		buttonsContainer = document.createElement("div");
+		buttonsContainer.id = BTNS_CONTAINER_ID;
+		buttonsContainer.classList.add('tm-notion-side-peek-btns-container');
+		
+		return buttonsContainer;
+	}
+	
 	let btn = null;
-
-	function makeButton() {
+	function buildBacklogButton() {
 		if (btn) return btn;
 
 		btn = document.createElement("button");
@@ -65,10 +90,10 @@
 		btn.onmouseenter = () => (btn.style.transform = "translateY(-1px)");
 		btn.onmouseleave = () => (btn.style.transform = "translateY(0)");
 
-		return btn;
+		buttonsContainer.appendChild(btn);
 	}
 
-	function refreshStyle() {
+	function refreshBacklogButtonStyle() {
 		if (!btn) return;
 
 		btn.classList.toggle("active", isSidePeekOpen())
@@ -81,7 +106,7 @@
 			topbar.style.position = "relative";
 		}
 
-		const b = makeButton();
+		const b = buildButtonsContainer();
 		if (!topbar.contains(b)) {
 			breadcrumb.after(b);
 		}
@@ -91,11 +116,12 @@
 	const attachObserver = new MutationObserver(() => {
 		const topbar = document.querySelector(NOTION_TOPBAR_SELECTOR);
 		if (topbar) {
-				const breadcrumb = topbar.querySelector(NOTION_TOPBAR_BREADCRUMB_SELECTOR);
+				const breadcrumb = topbar.querySelector(NOTION_BREADCRUMB_SELECTOR);
 				if (breadcrumb) {
 					attachObserver.disconnect();
 					// console.log('topbar and breadcrumb found, attaching');
 					attach(topbar, breadcrumb);
+					buildBacklogButton();
 				}
 				// else console.log('breadcrumb not found');
 
@@ -105,6 +131,6 @@
 
 	attachObserver.observe(document.body, { childList: true, subtree: true });
 
-	window.addEventListener("popstate", refreshStyle);
-	window.addEventListener("visibilitychange", refreshStyle);
+	window.addEventListener("popstate", refreshBacklogButtonStyle);
+	window.addEventListener("visibilitychange", refreshBacklogButtonStyle);
 })();
