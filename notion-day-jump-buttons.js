@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notion day jump buttons
+// @name         Notion Days Jump buttons
 // @match        https://www.notion.so/*
 // ==/UserScript==
 
@@ -49,7 +49,7 @@
 	".notion-page-content > .notion-selectable.notion-transclusion_reference-block";
 
 	const NOTION_TOPBAR_SELECTOR = ".notion-topbar";
-	const NOTION_TOPBAR_BREADCRUMB_SELECTOR = ".notion-topbar .shadow-cursor-breadcrumb";
+	const NOTION_BREADCRUMB_SELECTOR = ".shadow-cursor-breadcrumb";
 
 	let buttonsContainer = null;
 	let root = null;
@@ -334,19 +334,25 @@
 
 	}
 
-	// wait once for stable root
+	// TODO: reuse
 	const attachObserver = new MutationObserver(() => {
 		const topbar = document.querySelector(NOTION_TOPBAR_SELECTOR);
 		if (topbar) {
-				const breadcrumb = topbar.querySelector(NOTION_TOPBAR_BREADCRUMB_SELECTOR);
+				const breadcrumb = topbar.querySelector(NOTION_BREADCRUMB_SELECTOR);
 				if (breadcrumb) {
 					attachObserver.disconnect();
 					// console.log('topbar and breadcrumb found, attaching');
 					attach(topbar, breadcrumb);
 
-					hidePageLocationButton();
+					const breadcrumbButtons = [...breadcrumb.querySelectorAll("div[role='button']")];
+					if (breadcrumbButtons.length > 0) hidePageLocationButton(breadcrumbButtons);
+					// else console.log('no buttons found in breadcrumb');
+
 				}
-				// else console.log('breadcrumb not found');
+				else console.log('breadcrumb not found');
+
+				// wait for flexible space to appear then hide it
+				hideFlexibleSpace(topbar);
 
 		}
 		// else  console.log('topbar not found');
@@ -356,15 +362,42 @@
 
 	
 	// hide page location ("Private") button (cannot in CSS only)
-	function hidePageLocationButton() {
-		// console.log('hideTopBarButtons');
+	function hidePageLocationButton(breadcrumbButtons) {
+		// console.log(`hidePageLocationButton, found ${breadcrumbButtons.length} buttons`);
+		breadcrumbButtons.forEach(btn => {
+			if (btn.innerText?.trim() === "Private") {
+				btn.classList.add("tm-notion-hide");
+			}
+		});
+	}
 
-		document.querySelectorAll(".shadow-cursor-breadcrumb div[role='button']")
-			.forEach(btn => {
-				if (btn.innerText?.trim() === "Priv	ate") {
-					btn.classList.add("tm-notion-hide");
-				}
-			});
+		// hide top bar "flex" div (cannot in CSS only)
+	function hideFlexibleSpace(topbar) {
+		// console.log('hideFlexibleSpace')
+		const flexSpaceObserver = new MutationObserver(() => {
+			const potentialFlexibleSpace = [...topbar.querySelectorAll('.notion-selectable-container > div > div')]
+			// const potentialFlexibleSpace = topbar.querySelector('.notion-selectable-container > div > div [style*="flex-grow: 1"][style*="flex-shrink: 1"]')
+
+			if (potentialFlexibleSpace.length > 0) {
+				// console.log(`found ${potentialFlexibleSpace.length} potential flexible space`);
+
+				// const flexibleSpace = potentialFlexibleSpace
+				potentialFlexibleSpace
+					.forEach(div => {
+						const followedByActionButtons = div.nextElementSibling?.classList.contains('notion-topbar-action-buttons');
+						const style = getComputedStyle(div);
+						const isFlex = style.flexGrow === '1' && style.flexShrink === '1';
+
+						if (isFlex) {// && followedByActionButtons
+							console.log('found flexible space')
+							flexSpaceObserver.disconnect();
+							div.classList.add("tm-notion-hide");
+						}
+					});
+			}
+			else console.log('found no potential flexible space')
+		});
+		flexSpaceObserver.observe(topbar, { childList: true, subtree: true });
 	}
 
 	// const breadcrumbObserver = new MutationObserver(() => {
