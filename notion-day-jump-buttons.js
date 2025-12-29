@@ -10,14 +10,20 @@
 	style.textContent = `
 
 		.tm-notion-day-jump-btns-container {
-			margin-left: 0px;
+			overflow: hidden;
+			min-width: 0;
+			flex-grow: 0;
+			flex-shrink: 1;
+			flex-basis: auto;
+		}
+
+		.tm-notion-day-jump-btns-wrapper {
 			display: flex;
 			flex-direction: row;
 			align-items: center;
 			justify-content: flex-start;
 			gap: 6px;
-			width: max-content;
-			white-space: nowrap;
+			flex-wrap: nowrap;
 		}
 
 		.tm-notion-day-jump-btn {
@@ -29,6 +35,7 @@
 			font-size: 13px;
 			text-align: center;
 			color: #333;
+			white-space: nowrap;
 		}
 
 		.tm-notion-day-jump-btn.active {
@@ -140,6 +147,10 @@
 		buttonsContainer.id = BTNS_CONTAINER_ID;
 		buttonsContainer.classList.add('tm-notion-day-jump-btns-container');
 
+		buttonsContainerWrapper = document.createElement("div");
+		buttonsContainerWrapper.classList.add('tm-notion-day-jump-btns-wrapper');
+		buttonsContainer.appendChild(buttonsContainerWrapper);
+
 		return buttonsContainer;
 	}
 
@@ -183,7 +194,7 @@
 				btn.textContent = formatLabel(label);
 				btn.classList.add('tm-notion-day-jump-btn');
 				btn.onclick = (event) => scrollToGroup({ element, header, label });
-				buttonsContainer.appendChild(btn);
+				buttonsContainer.querySelector('div').appendChild(btn);
 			}
 		});
 	}

@@ -16,17 +16,22 @@
 			align-items: center;
 			justify-content: space-between;
 			flex-wrap: nowrap;
+			padding-left: 4px;
+			padding-right: 12px;
 		}
 
 		.tm-notion-side-peek-btns-container {
-				margin-left: 0px;
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				justify-content: flex-end;
-				gap: 6px;
-				white-space: nowrap;
-				flex-grow: 1;
+			margin-left: 8px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: flex-end;
+			gap: 6px;
+			flex-wrap: nowrap;
+			flex-grow: 1;
+			flex-shrink: 0;
+			flex-basis: auto;
+			min-width: max-content;
 		}
 
 		.tm-notion-side-peek-btn {
@@ -168,7 +173,7 @@
 		if (!target) return;
 
 		const targetRect = target.getBoundingClientRect();
-		console.log('layout content rect:', targetRect);
+		// console.log('layout content rect:', targetRect);
 		topBarButtonsContainer.style.left = `${targetRect.left}px`;
 		topBarButtonsContainer.style.width = `${targetRect.width - 2}px`;
 	}
