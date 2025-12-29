@@ -49,7 +49,7 @@
 			color: #fff;
 		}
 
-		.tm-notion-hide, .notion-topbar-share-menu, .notion-topbar-favorite-button {
+		.tm-notion-hide, .shadow-cursor-breadcrumb, .notion-topbar-share-menu, .notion-topbar-favorite-button {
 			display: none !important;
 		}
 	`;
@@ -141,10 +141,6 @@
 					// console.log('topbar and breadcrumb found, attaching');
 					attach(topbar, breadcrumb);
 					buildBacklogButton();
-
-					const breadcrumbButtons = [...breadcrumb.querySelectorAll("div[role='button']")];
-					if (breadcrumbButtons.length > 0) hidePageLocationButton(breadcrumbButtons);
-					// else console.log('no buttons found in breadcrumb');
 				}
 				// else console.log('breadcrumb not found');
 
@@ -159,15 +155,6 @@
 	window.addEventListener("popstate", refreshBacklogButtonStyle);
 	window.addEventListener("visibilitychange", refreshBacklogButtonStyle);
 
-	// hide page location ("Private") button (cannot in CSS only)
-	function hidePageLocationButton(breadcrumbButtons) {
-		// console.log(`hidePageLocationButton, found ${breadcrumbButtons.length} buttons`);
-		breadcrumbButtons.forEach(btn => {
-			if (btn.innerText?.trim() === "Private") {
-				btn.classList.add("tm-notion-hide");
-			}
-		});
-	}
 
 	// hide top bar "flex" div (cannot in CSS only)
 	function hideFlexibleSpace(topbar) {
@@ -199,19 +186,5 @@
 		});
 		flexSpaceObserver.observe(topbar, { childList: true, subtree: true });
 	}
-
-	// const breadcrumbObserver = new MutationObserver(() => {
-	// 	const breadcrumb = document.querySelector(NOTION_TOPBAR_BREADCRUMB_SELECTOR);
-	// 	if (breadcrumb) {
-	// 		console.log('breadcrumb found');
-	// 		hideTopBarButtons(breadcrumb);
-	// 	}
-	// 	else console.log('breadcrumb not found');
-	// });
-
-	// breadcrumbObserver.observe(breadcrumb, {
-	// 	childList: true,
-	// 	subtree: true
-	// });
 
 })();
