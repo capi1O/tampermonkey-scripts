@@ -10,7 +10,7 @@
 
 		.tm-notion-top-bar-btns-container {
 			position: absolute;
-			top: 0px;
+			top: 6px;
 			display: flex;
 			flex-direction: row;
 			align-items: center;
@@ -62,31 +62,16 @@
 	document.head.appendChild(style);
 
 
-	const BLOCK_ID = "27a9f56f-f579-41f8-83ea-5147c7f99bb5";
-	const PAGE_P_PARAM = "27a9f56ff57941f883ea5147c7f99bb5";
-
-	const TOP_BAR_BTNS_CONTAINER_ID = "tm-notion-top-bar-btns-container";
-	const SIDE_PEEK_BTNS_CONTAINER_ID = "tm-notion-side-peek-btns-container";
-	const BACKLOG_BTN_ID = "tm-notion-sidepeek-backlog-btn";
-
+	// TOP BAR BUTTONS CONTAINER
 	const NOTION_TOPBAR_SELECTOR = ".notion-topbar";
 	const NOTION_BREADCRUMB_SELECTOR = ".shadow-cursor-breadcrumb";
+	const TOP_BAR_BTNS_CONTAINER_ID = "tm-notion-top-bar-btns-container";
 
 	// buttons container is added to top bar (.notion-frame) and manually styled to match target width
 	const TARGET_SELECTOR =
 	".notion-frame > .notion-selectable-container > .notion-scroller.vertical > div > .layout > .layout-content";
 
-	function isSidePeekOpen() {
-		return location.search.includes(`p=${PAGE_P_PARAM}`);
-	}
-
-	function openSidePeek() {
-		const a = document.querySelector(`[data-block-id="${BLOCK_ID}"] a`);
-		a?.dispatchEvent(new MouseEvent("click", { altKey: true, bubbles: true }));
-	}
-
 	let topBarButtonsContainer = null;
-	let sidePeekButtonsContainer = null;
 	function buildButtonsContainer() {
 		// let buttonsContainer = document.getElementById(BTNS_CONTAINER_ID);
 		if (topBarButtonsContainer) return topBarButtonsContainer;
@@ -94,40 +79,9 @@
 		topBarButtonsContainer = document.createElement("div");
 		topBarButtonsContainer.id = TOP_BAR_BTNS_CONTAINER_ID;
 		topBarButtonsContainer.classList.add('tm-notion-top-bar-btns-container');
-		
-		sidePeekButtonsContainer = document.createElement("div");
-		sidePeekButtonsContainer.id = SIDE_PEEK_BTNS_CONTAINER_ID;
-		sidePeekButtonsContainer.classList.add('tm-notion-side-peek-btns-container');
-		topBarButtonsContainer.appendChild(sidePeekButtonsContainer);
 
 		return topBarButtonsContainer;
 	}
-	
-	let backlogButton = null;
-	function buildBacklogButton() {
-		if (backlogButton) return backlogButton;
-
-		backlogButton = document.createElement("button");
-		backlogButton.id = BACKLOG_BTN_ID;
-		backlogButton.innerHTML = `
-			<span style="font-size:18px;">🗄️</span>
-			<span style="font-size:16px;font-weight:600;margin-left:8px;">Backlog</span>
-		`;
-		backlogButton.classList.add('tm-notion-side-peek-btn');
-
-		backlogButton.onclick = openSidePeek;
-		backlogButton.onmouseenter = () => (backlogButton.style.transform = "translateY(-1px)");
-		backlogButton.onmouseleave = () => (backlogButton.style.transform = "translateY(0)");
-
-		sidePeekButtonsContainer.appendChild(backlogButton);
-	}
-
-	function refreshBacklogButtonStyle() {
-		if (!backlogButton) return;
-
-		backlogButton.classList.toggle("active", isSidePeekOpen())
-	}
-
 
 	// TODO: reuse
 	function attach(topbar, breadcrumb) {
@@ -150,7 +104,8 @@
 					attachObserver.disconnect();
 					// console.log('topbar and breadcrumb found, attaching');
 					attach(topbar, breadcrumb);
-					repositionButtonsContainer();
+					repositionTopBarButtonsContainer();
+					buildSidePeekButtonsContainer();
 					buildBacklogButton();
 				}
 				// else console.log('breadcrumb not found');
@@ -163,10 +118,8 @@
 
 	attachObserver.observe(document.body, { childList: true, subtree: true });
 
-	window.addEventListener("popstate", refreshBacklogButtonStyle);
-	window.addEventListener("visibilitychange", refreshBacklogButtonStyle);
 
-	function repositionButtonsContainer() {
+	function repositionTopBarButtonsContainer() {
 		if (!topBarButtonsContainer) return;
 
 		const target = document.querySelector(TARGET_SELECTOR);
@@ -178,16 +131,16 @@
 		topBarButtonsContainer.style.width = `${targetRect.width - 2}px`;
 	}
 
-	window.addEventListener("resize", repositionButtonsContainer);
-	window.addEventListener("scroll", repositionButtonsContainer, true);
+	window.addEventListener("resize", repositionTopBarButtonsContainer);
+	window.addEventListener("scroll", repositionTopBarButtonsContainer, true);
 
-		// reactive updates (read-only)
-		const reactiveObserver = new MutationObserver(() => {
-			refreshBacklogButtonStyle();
-			repositionButtonsContainer();
-		});
+	// reactive updates (read-only)
+	const reactiveObserver = new MutationObserver(() => {
+		refreshBacklogButtonStyle();
+		repositionTopBarButtonsContainer();
+	});
 
-		reactiveObserver.observe(document.body, { childList: true, subtree: true });
+	reactiveObserver.observe(document.body, { childList: true, subtree: true });
 
 	// hide top bar "flex" div (cannot in CSS only)
 	function hideFlexibleSpace(topbar) {
@@ -220,4 +173,138 @@
 		flexSpaceObserver.observe(topbar, { childList: true, subtree: true });
 	}
 
+
+	// SIDE PEEK BUTTONS
+	const PAGE_P_PARAM = "27a9f56ff57941f883ea5147c7f99bb5";
+	const SIDE_PEEK_BTNS_CONTAINER_ID = "tm-notion-side-peek-btns-container";
+
+	let sidePeekButtonsContainer = null;
+	function buildSidePeekButtonsContainer() {
+		// let buttonsContainer = document.getElementById(BTNS_CONTAINER_ID);
+		
+		sidePeekButtonsContainer = document.createElement("div");
+		sidePeekButtonsContainer.id = SIDE_PEEK_BTNS_CONTAINER_ID;
+		sidePeekButtonsContainer.classList.add('tm-notion-side-peek-btns-container');
+		topBarButtonsContainer.appendChild(sidePeekButtonsContainer);
+
+		return sidePeekButtonsContainer;
+	}
+	function isSidePeekOpen() {
+		return /[?&]p=/.test(location.search);
+	}
+
+
+	// BACKLOG BUTTON
+	const BACKLOG_BUTTON_BLOCK_ID = "27a9f56f-f579-41f8-83ea-5147c7f99bb5";
+	const BACKLOG_BTN_ID = "tm-notion-sidepeek-backlog-btn";
+	function isBacklogOpenInSidePeek() {
+		return location.search.includes(`p=${PAGE_P_PARAM}`);
+	}
+
+	let backlogButton = null;
+	function buildBacklogButton() {
+		if (backlogButton) return backlogButton;
+
+		backlogButton = document.createElement("button");
+		backlogButton.id = BACKLOG_BTN_ID;
+		backlogButton.innerHTML = `
+			<span style="font-size:18px;">🗄️</span>
+			<span style="font-size:16px;font-weight:600;margin-left:8px;">Backlog</span>
+		`;
+		backlogButton.classList.add('tm-notion-side-peek-btn');
+
+		backlogButton.onclick = openBacklogInSidePeek;
+		backlogButton.onmouseenter = () => (backlogButton.style.transform = "translateY(-1px)");
+		backlogButton.onmouseleave = () => (backlogButton.style.transform = "translateY(0)");
+
+		sidePeekButtonsContainer.appendChild(backlogButton);
+	}
+
+	function refreshBacklogButtonStyle() {
+		if (!backlogButton) return;
+
+		backlogButton.classList.toggle("active", isBacklogOpenInSidePeek())
+	}
+
+	window.addEventListener("popstate", refreshBacklogButtonStyle);
+	window.addEventListener("visibilitychange", refreshBacklogButtonStyle);
+
+	function openBacklogInSidePeek() {
+
+		if (isSidePeekOpen()) {
+
+			const a = document.querySelector(`[data-block-id="${BACKLOG_BUTTON_BLOCK_ID}"] a`);
+			if (a) {
+
+				// Method 1: simulate alt click
+				// a.dispatchEvent(new MouseEvent("click", { altKey: true, bubbles: true }));
+
+				// Method 2: simulate alt click v2
+				// const opts = {
+				// 	bubbles: true,
+				// 	cancelable: true,
+				// 	altKey: true,
+				// 	button: 0,
+				// 	buttons: 1
+				// };
+				// a.dispatchEvent(new PointerEvent("pointerdown", opts));
+				// a.dispatchEvent(new MouseEvent("mousedown", opts));
+				// a.dispatchEvent(new MouseEvent("mouseup", opts));
+				// a.dispatchEvent(new MouseEvent("click", opts));
+
+
+				// Method 3: simulate Alt key down, click then Alt key up
+				// window.dispatchEvent(
+				// 	new KeyboardEvent("keydown", {
+				// 		key: "Alt",
+				// 		altKey: true,
+				// 		bubbles: true
+				// 	})
+				// );
+				// a.click();
+				// window.dispatchEvent(
+				// 	new KeyboardEvent("keyup", {
+				// 		key: "Alt",
+				// 		bubbles: true
+				// 	})
+				// );
+
+				// Method 4: Create a temporary link element with Alt key to trigger side peek
+				// 	const a = document.createElement('a');
+				// 	a.href = 'https://www.notion.so/cap1o/Planning-0d0b47fba5e647f6b89a7d6967e93c3a?p=27a9f56ff57941f883ea5147c7f99bb5&pm=s';
+				// 	a.style.display = 'none';
+				// 	document.body.appendChild(a);
+				// 	const evt = new MouseEvent('click', {
+				// 			bubbles: true,
+				// 			cancelable: true,
+				// 			altKey: true   // Alt triggers Side Peek
+				// 	});
+				// 	a.dispatchEvent(evt);
+				// 	document.body.removeChild(a);
+
+				// Method 5: change URL
+				// const url = new URL(location.href); //new URL(window.location);
+				// url.searchParams.set('p', '27a9f56ff57941f883ea5147c7f99bb5');
+				// url.searchParams.set('pm', 's');
+				// history.pushState(null, '', url); // changes URL without reload
+				// trigger some Notion JS function:
+				// window.dispatchEvent(new Event('popstate'));
+			}
+			else console.log('backlog button not found')
+		}
+		else openSidePeek();
+
+
+		// if (isSidePeekOpen()) {
+		// 	console.log('close side peek');
+
+		// 	// simulate Esc key press
+		// 	const escEvent = new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true });
+		// 	document.dispatchEvent(escEvent);
+		// }
+		// else {
+		// 	console.log('open side peek');
+
+		// }
+	}
 })();
